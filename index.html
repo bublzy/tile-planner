@@ -47,7 +47,24 @@ button,input,select,textarea{font:inherit;color:inherit}
 .app{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:14px 28px;max-width:1500px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
 .top{display:flex;flex-wrap:wrap;align-items:center;gap:12px 20px;justify-content:space-between}
 .brand{display:flex;align-items:center;gap:12px;min-width:0}
-.logo{width:38px;height:38px;flex:none}
+.logo{width:38px;height:38px;flex:none;display:block}
+.logobtn{position:relative;flex:none;border:0;padding:0;background:none;cursor:pointer;border-radius:9px}
+.logobtn:hover .logo{filter:brightness(1.1)}
+.logobtn .mb{position:absolute;right:-6px;bottom:-6px;width:19px;height:19px;border-radius:50%;background:var(--panel);border:1px solid var(--line);display:grid;place-items:center;color:var(--ink)}
+.logobtn .mb svg{width:10px;height:10px}
+.drawer{position:fixed;inset:0 auto 0 0;margin:0;padding:0;border:0;border-right:1px solid var(--line);width:min(420px,92vw);max-width:none;height:100%;max-height:none;background:var(--bg);color:var(--ink);box-shadow:0 0 40px rgba(0,0,0,.25);overflow:auto}
+.drawer::backdrop{background:rgba(8,14,16,.45)}
+.drawer[open]{animation:dwin .18s ease-out}
+@keyframes dwin{from{transform:translateX(-100%)}}
+.dw{display:flex;flex-direction:column;gap:12px;min-height:100%;padding:max(14px,env(safe-area-inset-top,0px)) 14px max(18px,env(safe-area-inset-bottom,0px)) max(14px,env(safe-area-inset-left,0px))}
+.dhd{display:flex;align-items:center;gap:10px}
+.dhd .logo{width:30px;height:30px}
+.dhd b{font-family:var(--f-display);font-weight:600;font-size:15px;flex:1}
+.plate{border:1px solid var(--line);border-radius:12px;background:var(--panel);padding:12px;display:flex;flex-direction:column;gap:10px}
+.plate>h2{display:flex;align-items:center;gap:8px;margin:0;font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600}
+.plate>h2 .cnt{font-family:var(--f-mono);font-size:12px;background:var(--accent-soft);color:var(--ink);border-radius:20px;padding:0 8px;letter-spacing:0}
+.plate .list{gap:6px}
+.prow.unsaved{border-style:dashed;border-color:var(--cut-stroke)}
 h1{font-family:var(--f-display);font-weight:600;font-size:17px;margin:0;letter-spacing:.01em;text-wrap:balance}
 #pname{border:0;background:transparent;padding:2px 0;color:var(--muted);width:min(320px,60vw);border-bottom:1px dashed transparent}
 #pname:hover,#pname:focus{border-bottom-color:var(--line);outline:none}
@@ -187,7 +204,7 @@ textarea{width:100%;min-height:90px;border:1px solid var(--line);border-radius:7
 <div class="app">
   <header class="top">
     <div class="brand">
-      <svg class="logo" viewBox="0 0 40 40" aria-hidden="true"><rect x="1" y="1" width="38" height="38" rx="8" fill="var(--accent)"/><g fill="var(--accent-ink)"><rect x="7" y="7" width="12" height="12" rx="1"/><rect x="21" y="7" width="12" height="12" rx="1"/><rect x="7" y="21" width="12" height="12" rx="1"/><rect x="21" y="21" width="6" height="12" rx="1" opacity=".55"/></g></svg>
+      <button class="logobtn" id="b-menu" aria-label="Меню: мои проекты" aria-haspopup="dialog" title="Меню и проекты"><svg class="logo" viewBox="0 0 40 40" aria-hidden="true"><rect x="1" y="1" width="38" height="38" rx="8" fill="var(--accent)"/><g fill="var(--accent-ink)"><rect x="7" y="7" width="12" height="12" rx="1"/><rect x="21" y="7" width="12" height="12" rx="1"/><rect x="7" y="21" width="12" height="12" rx="1"/><rect x="21" y="21" width="6" height="12" rx="1" opacity=".55"/></g></svg><span class="mb" aria-hidden="true"><svg viewBox="0 0 10 10"><path d="M1 2h8M1 5h8M1 8h8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></span></button>
       <div>
         <h1>Раскладка плитки</h1>
         <input id="pname" aria-label="Название проекта" placeholder="Название проекта" maxlength="80">
@@ -197,7 +214,6 @@ textarea{width:100%;min-height:90px;border:1px solid var(--line);border-radius:7
       <span class="savestate" id="savestate"></span>
       <button class="btn pri" id="b-save">Сохранить</button>
       <button class="btn" id="b-projects">Мои проекты</button>
-      <button class="btn" id="b-new">Новая комната</button>
     </div>
   </header>
   <div id="savebox" class="card" hidden>
@@ -205,12 +221,21 @@ textarea{width:100%;min-height:90px;border:1px solid var(--line);border-radius:7
     <label class="f"><span>Название проекта</span><div class="in"><input id="savename" maxlength="80" placeholder="Например: Ванная, ул. Садовая 12, кв. 5"></div></label>
     <div class="btns"><button class="btn pri" id="b-save-ok">Сохранить</button><span class="hint" id="savemsg"></span></div>
   </div>
-  <div id="projbox" class="card" hidden>
-    <div class="hd">Мои проекты <button class="btn sm" data-close="projbox">Закрыть</button></div>
-    <div id="projlist" class="list"></div>
-    <div class="btns"><button class="btn sm" id="b-example">Открыть пример</button><button class="btn sm" id="b-copy">Скопировать для переноса</button><button class="btn sm" id="b-paste">Вставить проект</button></div>
-    <p class="hint">Проекты хранятся в этом браузере на этом устройстве. Чтобы перенести проект, например на телефон, нажмите «Скопировать для переноса», перешлите себе текст и на другом устройстве нажмите «Вставить проект».</p>
-  </div>
+  <dialog id="menu" class="drawer" aria-label="Меню">
+    <div class="dw">
+      <div class="dhd"><svg class="logo" viewBox="0 0 40 40" aria-hidden="true"><rect x="1" y="1" width="38" height="38" rx="8" fill="var(--accent)"/><g fill="var(--accent-ink)"><rect x="7" y="7" width="12" height="12" rx="1"/><rect x="21" y="7" width="12" height="12" rx="1"/><rect x="7" y="21" width="12" height="12" rx="1"/><rect x="21" y="21" width="6" height="12" rx="1" opacity=".55"/></g></svg><b>Раскладка плитки</b><button class="btn sm" id="b-menu-close">Закрыть</button></div>
+      <section class="plate" aria-labelledby="h-proj">
+        <h2 id="h-proj">Проекты <span class="cnt" id="projcnt"></span></h2>
+        <div class="btns"><button class="btn sm pri" id="b-new">+ Новая комната</button><button class="btn sm" id="b-example">Открыть пример</button></div>
+        <div id="projlist" class="list"></div>
+      </section>
+      <section class="plate" aria-labelledby="h-move">
+        <h2 id="h-move">Перенос на другое устройство</h2>
+        <div class="btns"><button class="btn sm" id="b-copy">Скопировать для переноса</button><button class="btn sm" id="b-paste">Вставить проект</button></div>
+        <p class="hint">Проекты хранятся в этом браузере на этом устройстве. Чтобы открыть проект, например, на телефоне, нажмите «Скопировать для переноса», перешлите себе текст и на другом устройстве нажмите «Вставить проект».</p>
+      </section>
+    </div>
+  </dialog>
   <div id="pastebox" class="card" hidden>
     <div class="hd">Вставьте текст проекта <button class="btn sm" id="b-paste-close">Закрыть</button></div>
     <textarea id="pastearea" placeholder="Сюда вставьте текст, скопированный кнопкой «Скопировать проект»"></textarea>
@@ -343,16 +368,20 @@ function libPut(force){
   if(!S.pid)return;const sn=snap();if(!force&&sn===lastLib)return;
   const a=libLoad(),e={id:S.pid,name:(S.name||'').trim()||'Без названия',updated:Date.now(),W:S.room.W,L:S.room.L,data:JSON.parse(JSON.stringify(S))};
   const i=a.findIndex(x=>x.id===S.pid);if(i>=0)a[i]=e;else a.unshift(e);
-  libErr=!libStore(a);if(!libErr)lastLib=sn;renderSaveState();if(!$('#projbox').hidden)renderProjects();}
+  libErr=!libStore(a);if(!libErr)lastLib=sn;renderSaveState();if(menuEl().open)renderProjects();}
 const tfmt=t=>new Date(t).toLocaleString('ru-RU',{day:'2-digit',month:'2-digit',year:'2-digit',hour:'2-digit',minute:'2-digit'});
 function renderSaveState(){const el=$('#savestate');if(!el)return;
   if(libErr){el.className='savestate no';el.textContent='Браузер не даёт сохранить';return;}
   if(S.pid){const e=libLoad().find(x=>x.id===S.pid);el.className='savestate';el.textContent=e?`Сохранён ${tfmt(e.updated)}`:'Сохранён';}
   else{el.className='savestate no';el.textContent='Не сохранён';}
-  const n=libLoad().length;$('#b-projects').textContent=n?`Мои проекты (${n})`:'Мои проекты';}
+  const n=libLoad().length;$('#b-projects').textContent=n?`Мои проекты (${n})`:'Мои проекты';$('#projcnt').textContent=n;}
+const menuEl=()=>document.getElementById('menu');
+function openMenu(){const m=menuEl();$('#savebox').hidden=true;renderProjects();if(m.open)return;if(m.showModal)m.showModal();else m.setAttribute('open','');}
+function closeMenu(){const m=menuEl();if(!m.open)return;if(m.close)m.close();else m.removeAttribute('open');}
 function renderProjects(){
   const a=libLoad().sort((x,y)=>y.updated-x.updated);
-  $('#projlist').innerHTML=a.map(e=>{const cur=e.id===S.pid;return`<div class="prow ${cur?'on':''}"><div class="pn"><b>${esc(e.name)}</b><span>${fmt(e.W)} × ${fmt(e.L)} см · ${tfmt(e.updated)}${cur?' · открыт':''}</span></div>
+  const cur=S.pid?'':`<div class="prow unsaved"><div class="pn"><b>${esc((S.name||'').trim()||'Без названия')}</b><span>${fmt(S.room.W)} × ${fmt(S.room.L)} см · открыт, не сохранён</span></div><div class="btns"><button class="btn sm pri" data-psave="1">Сохранить</button></div></div>`;
+  $('#projlist').innerHTML=cur+a.map(e=>{const cur=e.id===S.pid;return`<div class="prow ${cur?'on':''}"><div class="pn"><b>${esc(e.name)}</b><span>${fmt(e.W)} × ${fmt(e.L)} см · ${tfmt(e.updated)}${cur?' · открыт':''}</span></div>
     <div class="btns">${cur?'':`<button class="btn sm pri" data-popen="${e.id}">Открыть</button>`}<button class="btn sm" data-pdup="${e.id}">Копия</button><button class="btn sm warn" data-pdel="${e.id}">Удалить</button></div></div>`;}).join('')
     ||'<p class="hint">Сохранённых проектов пока нет. Нажмите «Сохранить» вверху и укажите название — проект появится здесь.</p>';}
 /* Двойное нажатие для действий, после которых несохранённое пропадёт */
@@ -857,7 +886,8 @@ let newArmed=0;
 document.addEventListener('click',e=>{
   const b=e.target.closest('button');if(!b)return;
   if(b.dataset.close){$('#'+b.dataset.close).hidden=true;return;}
-  if(b.dataset.popen){const e=libLoad().find(x=>x.id===b.dataset.popen);if(!e)return;guardUnsaved(b,()=>{openState(normalize(e.data),e.id);$('#projbox').hidden=true;});return;}
+  if(b.dataset.psave){closeMenu();$('#b-save').click();return;}
+  if(b.dataset.popen){const e=libLoad().find(x=>x.id===b.dataset.popen);if(!e)return;guardUnsaved(b,()=>{openState(normalize(e.data),e.id);closeMenu();});return;}
   if(b.dataset.pdup){const a=libLoad(),e=a.find(x=>x.id===b.dataset.pdup);if(!e)return;const c=JSON.parse(JSON.stringify(e));c.id=uid();c.name=e.name+' (копия)';c.data.name=c.name;c.data.pid=c.id;c.updated=Date.now();a.unshift(c);libErr=!libStore(a);renderProjects();renderSaveState();return;}
   if(b.dataset.pdel){const id=b.dataset.pdel;confirmTwice(b,'Удалить насовсем?',()=>{libStore(libLoad().filter(x=>x.id!==id));if(S.pid===id){S.pid='';baseline='';lastLib='';save();}renderProjects();renderSaveState();});return;}
   if(b.dataset.tab){setTab(b.dataset.tab);save();return;}
@@ -879,24 +909,26 @@ document.addEventListener('click',e=>{
   else if(a==='resetfs'){S.floor.sx=S.floor.sy=0;render();}
   else if(a==='resetws'){S.wall.shift[S.view]=0;S.wall.sv=0;render();}
 });
-$('#b-example').onclick=e=>guardUnsaved(e.currentTarget,()=>{openState(example(),'');$('#projbox').hidden=true;});
-$('#b-new').onclick=e=>guardUnsaved(e.currentTarget,()=>{const s=base();s.tab='room';openState(s,'');});
+$('#b-example').onclick=e=>guardUnsaved(e.currentTarget,()=>{openState(example(),'');closeMenu();});
+$('#b-new').onclick=e=>guardUnsaved(e.currentTarget,()=>{const s=base();s.tab='room';openState(s,'');closeMenu();});
 function doSave(name){S.name=name;if(!S.pid)S.pid=uid();libPut(true);syncInputs();
   if(libErr){$('#savemsg').textContent='Браузер не разрешает сохранять (возможно, приватный режим или нет места).';return false;}return true;}
 $('#b-save').onclick=e=>{const b=e.currentTarget;
   if(S.pid){doSave((S.name||'').trim()||'Без названия');if(!libErr){b.textContent='Сохранено';setTimeout(()=>b.textContent='Сохранить',1500);}return;}
-  $('#projbox').hidden=true;$('#savebox').hidden=false;$('#savemsg').textContent='';const i=$('#savename');i.value=(S.name&&S.name!=='Новая ванная'&&!/пример/i.test(S.name))?S.name:'';i.focus();};
+  closeMenu();$('#savebox').hidden=false;$('#savemsg').textContent='';const i=$('#savename');i.value=(S.name&&S.name!=='Новая ванная'&&!/пример/i.test(S.name))?S.name:'';i.focus();};
 $('#b-save-ok').onclick=()=>{const n=$('#savename').value.trim();if(!n){$('#savemsg').textContent='Введите название проекта.';$('#savename').focus();return;}
   if(doSave(n)){$('#savebox').hidden=true;baseline=snap();}};
 $('#savename').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();$('#b-save-ok').click();}});
-$('#b-projects').onclick=()=>{const pb=$('#projbox');pb.hidden=!pb.hidden;$('#savebox').hidden=true;if(!pb.hidden)renderProjects();};
+$('#b-projects').onclick=openMenu;$('#b-menu').onclick=openMenu;$('#b-menu-close').onclick=closeMenu;
+menuEl().addEventListener('click',e=>{if(e.target===menuEl())closeMenu();});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&menuEl().open)closeMenu();});
 $('#b-copy').onclick=async e=>{const b=e.currentTarget,o=Object.assign({},S);delete o.pid;const txt=JSON.stringify(o);
   try{await navigator.clipboard.writeText(txt);b.textContent='Скопировано';}
-  catch(err){$('#pastebox').hidden=false;$('#pastearea').value=txt;$('#pastearea').select();$('#pastemsg').textContent='Скопируйте текст из поля вручную (Ctrl+C).';}
+  catch(err){closeMenu();$('#pastebox').hidden=false;$('#pastearea').value=txt;$('#pastearea').select();$('#pastemsg').textContent='Скопируйте текст из поля вручную (Ctrl+C).';}
   setTimeout(()=>b.textContent='Скопировать для переноса',1800);};
-$('#b-paste').onclick=()=>{$('#pastebox').hidden=false;$('#savebox').hidden=true;$('#pastearea').value='';$('#pastemsg').textContent='';$('#pastearea').focus();};
+$('#b-paste').onclick=()=>{closeMenu();$('#pastebox').hidden=false;$('#savebox').hidden=true;$('#pastearea').value='';$('#pastemsg').textContent='';$('#pastearea').focus();};
 $('#b-paste-close').onclick=()=>{$('#pastebox').hidden=true;};
-$('#b-paste-load').onclick=()=>{try{const s=normalize(JSON.parse($('#pastearea').value));openState(s,'');$('#pastebox').hidden=true;$('#projbox').hidden=true;$('#savestate').textContent='Не сохранён — нажмите «Сохранить»';}
+$('#b-paste-load').onclick=()=>{try{const s=normalize(JSON.parse($('#pastearea').value));openState(s,'');$('#pastebox').hidden=true;$('#savestate').textContent='Не сохранён — нажмите «Сохранить»';}
   catch(err){$('#pastemsg').textContent='Не получилось прочитать. Вставьте текст целиком, как он был скопирован.';}};
 
 /* перетаскивание */

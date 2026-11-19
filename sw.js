@@ -1,5 +1,5 @@
 // Офлайн-кэш: сначала сеть (чтобы приходили обновления), без сети — сохранённая копия
-const CACHE = 'tile-planner-v2';
+const CACHE = 'tile-planner-v3';
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(['./', './index.html', './manifest.webmanifest', './icon.svg'])));
   self.skipWaiting();
