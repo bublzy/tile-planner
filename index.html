@@ -51,7 +51,14 @@ button,input,select,textarea{font:inherit;color:inherit}
 h1{font-family:var(--f-display);font-weight:600;font-size:17px;margin:0;letter-spacing:.01em;text-wrap:balance}
 #pname{border:0;background:transparent;padding:2px 0;color:var(--muted);width:min(320px,60vw);border-bottom:1px dashed transparent}
 #pname:hover,#pname:focus{border-bottom-color:var(--line);outline:none}
-.proj{display:flex;flex-wrap:wrap;gap:6px}
+.proj{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.savestate{font-size:12.5px;color:var(--muted);margin-right:4px}
+.savestate.no{color:var(--cut-stroke)}
+.prow{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;justify-content:space-between;border:1px solid var(--line);background:var(--panel);border-radius:8px;padding:8px 10px}
+.prow.on{border-color:var(--accent);box-shadow:inset 3px 0 0 var(--accent)}
+.prow .pn{display:flex;flex-direction:column;min-width:0}
+.prow .pn b{font-weight:600;overflow-wrap:anywhere}
+.prow .pn span{font-size:12.5px;color:var(--muted);font-family:var(--f-mono)}
 .btn{border:1px solid var(--line);background:var(--panel);border-radius:7px;padding:6px 11px;cursor:pointer;white-space:nowrap}
 .btn:hover{border-color:var(--accent)}
 .btn.pri{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
@@ -183,16 +190,27 @@ textarea{width:100%;min-height:90px;border:1px solid var(--line);border-radius:7
       <svg class="logo" viewBox="0 0 40 40" aria-hidden="true"><rect x="1" y="1" width="38" height="38" rx="8" fill="var(--accent)"/><g fill="var(--accent-ink)"><rect x="7" y="7" width="12" height="12" rx="1"/><rect x="21" y="7" width="12" height="12" rx="1"/><rect x="7" y="21" width="12" height="12" rx="1"/><rect x="21" y="21" width="6" height="12" rx="1" opacity=".55"/></g></svg>
       <div>
         <h1>Раскладка плитки</h1>
-        <input id="pname" aria-label="Название проекта" maxlength="80">
+        <input id="pname" aria-label="Название проекта" placeholder="Название проекта" maxlength="80">
       </div>
     </div>
     <div class="proj">
-      <button class="btn" id="b-copy">Скопировать проект</button>
-      <button class="btn" id="b-paste">Вставить проект</button>
-      <button class="btn" id="b-example">Пример</button>
+      <span class="savestate" id="savestate"></span>
+      <button class="btn pri" id="b-save">Сохранить</button>
+      <button class="btn" id="b-projects">Мои проекты</button>
       <button class="btn" id="b-new">Новая комната</button>
     </div>
   </header>
+  <div id="savebox" class="card" hidden>
+    <div class="hd">Сохранить проект <button class="btn sm" data-close="savebox">Закрыть</button></div>
+    <label class="f"><span>Название проекта</span><div class="in"><input id="savename" maxlength="80" placeholder="Например: Ванная, ул. Садовая 12, кв. 5"></div></label>
+    <div class="btns"><button class="btn pri" id="b-save-ok">Сохранить</button><span class="hint" id="savemsg"></span></div>
+  </div>
+  <div id="projbox" class="card" hidden>
+    <div class="hd">Мои проекты <button class="btn sm" data-close="projbox">Закрыть</button></div>
+    <div id="projlist" class="list"></div>
+    <div class="btns"><button class="btn sm" id="b-example">Открыть пример</button><button class="btn sm" id="b-copy">Скопировать для переноса</button><button class="btn sm" id="b-paste">Вставить проект</button></div>
+    <p class="hint">Проекты хранятся в этом браузере на этом устройстве. Чтобы перенести проект, например на телефон, нажмите «Скопировать для переноса», перешлите себе текст и на другом устройстве нажмите «Вставить проект».</p>
+  </div>
   <div id="pastebox" class="card" hidden>
     <div class="hd">Вставьте текст проекта <button class="btn sm" id="b-paste-close">Закрыть</button></div>
     <textarea id="pastearea" placeholder="Сюда вставьте текст, скопированный кнопкой «Скопировать проект»"></textarea>
@@ -277,7 +295,7 @@ function mkPoint(t,o){const T=PTYPES[t];return Object.assign({id:uid(),t,wall:'B
 function mkItem(t,o){const T=TYPES[t];return Object.assign({id:uid(),t,w:T.w,d:T.d,h:T.h,z:T.z,fs:T.fs,ws:T.ws,clad:T.clad,x:0,y:0},o||{});}
 function mkOpen(t,o){const T=OTYPES[t];return Object.assign({id:uid(),t,wall:'C',u:20,w:T.w,h:T.h,z:T.z,dep:T.dep||0},o||{});}
 function base(){return{
-  v:1,name:'Новая ванная',view:'floor',tab:'room',sel:null,narrow:5,
+  v:1,pid:'',name:'Новая ванная',view:'floor',tab:'room',sel:null,narrow:5,
   room:{W:170,L:240,H:250},
   floor:{tw:30,th:30,g:2,thick:9,glue:6,pattern:'straight',mx:'auto',my:'auto',dm:'auto',sx:0,sy:0,waste:10,pack:1.44},
   wall:{tw:60,th:30,g:2,thick:8,glue:6,pattern:'straight',mh:'auto',mv:'floor',vLine:60,sv:0,shift:{A:0,B:0,C:0,D:0},hmode:'ceil',height:250,waste:10,pack:1.44},
@@ -313,7 +331,38 @@ function normalize(raw){const s=deepFill(base(),raw);
   if(!WALLS.includes(s.view)&&s.view!=='floor'&&s.view!=='all')s.view='floor';
   return s;}
 function load(){try{const t=localStorage.getItem(LS);if(t)return normalize(JSON.parse(t));}catch(e){}return example();}
-let saveT=0;function save(){clearTimeout(saveT);saveT=setTimeout(()=>{try{localStorage.setItem(LS,JSON.stringify(S));}catch(e){}},300);}
+let saveT=0;function save(){clearTimeout(saveT);saveT=setTimeout(()=>{try{localStorage.setItem(LS,JSON.stringify(S));}catch(e){}libPut(false);},300);}
+/* Библиотека проектов */
+const LIB='tile-planner-lib-v1';
+function libLoad(){try{const a=JSON.parse(localStorage.getItem(LIB)||'[]');return Array.isArray(a)?a.filter(x=>x&&x.id&&x.data):[];}catch(e){return[];}}
+function libStore(a){try{localStorage.setItem(LIB,JSON.stringify(a));return true;}catch(e){return false;}}
+const snap=()=>{const o=Object.assign({},S);delete o.view;delete o.tab;delete o.sel;delete o.pid;return JSON.stringify(o);};
+let baseline='',lastLib='',libErr=false;
+const isDirty=()=>!S.pid&&snap()!==baseline;
+function libPut(force){
+  if(!S.pid)return;const sn=snap();if(!force&&sn===lastLib)return;
+  const a=libLoad(),e={id:S.pid,name:(S.name||'').trim()||'Без названия',updated:Date.now(),W:S.room.W,L:S.room.L,data:JSON.parse(JSON.stringify(S))};
+  const i=a.findIndex(x=>x.id===S.pid);if(i>=0)a[i]=e;else a.unshift(e);
+  libErr=!libStore(a);if(!libErr)lastLib=sn;renderSaveState();if(!$('#projbox').hidden)renderProjects();}
+const tfmt=t=>new Date(t).toLocaleString('ru-RU',{day:'2-digit',month:'2-digit',year:'2-digit',hour:'2-digit',minute:'2-digit'});
+function renderSaveState(){const el=$('#savestate');if(!el)return;
+  if(libErr){el.className='savestate no';el.textContent='Браузер не даёт сохранить';return;}
+  if(S.pid){const e=libLoad().find(x=>x.id===S.pid);el.className='savestate';el.textContent=e?`Сохранён ${tfmt(e.updated)}`:'Сохранён';}
+  else{el.className='savestate no';el.textContent='Не сохранён';}
+  const n=libLoad().length;$('#b-projects').textContent=n?`Мои проекты (${n})`:'Мои проекты';}
+function renderProjects(){
+  const a=libLoad().sort((x,y)=>y.updated-x.updated);
+  $('#projlist').innerHTML=a.map(e=>{const cur=e.id===S.pid;return`<div class="prow ${cur?'on':''}"><div class="pn"><b>${esc(e.name)}</b><span>${fmt(e.W)} × ${fmt(e.L)} см · ${tfmt(e.updated)}${cur?' · открыт':''}</span></div>
+    <div class="btns">${cur?'':`<button class="btn sm pri" data-popen="${e.id}">Открыть</button>`}<button class="btn sm" data-pdup="${e.id}">Копия</button><button class="btn sm warn" data-pdel="${e.id}">Удалить</button></div></div>`;}).join('')
+    ||'<p class="hint">Сохранённых проектов пока нет. Нажмите «Сохранить» вверху и укажите название — проект появится здесь.</p>';}
+/* Двойное нажатие для действий, после которых несохранённое пропадёт */
+let armed=null;
+function confirmTwice(b,txt,fn){if(armed===b){armed=null;fn();return;}
+  if(armed){armed.textContent=armed.dataset.lbl;armed.classList.remove('warn');}
+  armed=b;b.dataset.lbl=b.dataset.lbl||b.textContent;b.textContent=txt;b.classList.add('warn');
+  setTimeout(()=>{if(armed===b){armed=null;b.textContent=b.dataset.lbl;b.classList.remove('warn');}},3500);}
+function guardUnsaved(b,fn){if(isDirty())confirmTwice(b,'Текущий не сохранён. Точно?',fn);else fn();}
+function openState(st,pid){S=st;S.pid=pid||'';S.sel=null;baseline=snap();lastLib=pid?snap():'';fullRefresh();renderSaveState();}
 
 /* ---------- geometry ---------- */
 function clipEdge(pts,inside,inter){const out=[];for(let i=0;i<pts.length;i++){const a=pts[i],b=pts[(i+1)%pts.length];const ai=inside(a),bi=inside(b);
@@ -664,7 +713,7 @@ function render(){
   cv.innerHTML=out.html;
   renderCaption(C);renderResults(C);syncItemXY();syncPoints();save();
 }
-let raf=0;const schedule=()=>{if(!raf)raf=requestAnimationFrame(()=>{raf=0;render();});};
+let raf=0;const schedule=()=>{save();if(!raf)raf=requestAnimationFrame(()=>{raf=0;render();});};
 
 /* ---------- панель настроек ---------- */
 const idOf=k=>'f-'+k.replace(/\./g,'-');
@@ -781,6 +830,7 @@ function fullRefresh(){syncInputs();renderOpenings();renderPoints();renderItemLi
 document.addEventListener('input',e=>{
   const el=e.target;
   if(el.id==='pname'){S.name=el.value;save();return;}
+  if(el.id==='savename'||el.id==='pastearea')return;
   if(el.dataset.k){const k=el.dataset.k;let v;
     if(el.type==='checkbox')v=el.checked;else if(el.type==='number'){v=parseFloat(String(el.value).replace(',','.'));if(!isFinite(v))return;const mn=parseFloat(el.min),mx=parseFloat(el.max);if(v<mn||v>mx)return;}else v=el.value;
     const old=getP(k);setP(k,v);
@@ -806,6 +856,10 @@ const ROT={floor:['tw','th'],wall:['tw','th']};
 let newArmed=0;
 document.addEventListener('click',e=>{
   const b=e.target.closest('button');if(!b)return;
+  if(b.dataset.close){$('#'+b.dataset.close).hidden=true;return;}
+  if(b.dataset.popen){const e=libLoad().find(x=>x.id===b.dataset.popen);if(!e)return;guardUnsaved(b,()=>{openState(normalize(e.data),e.id);$('#projbox').hidden=true;});return;}
+  if(b.dataset.pdup){const a=libLoad(),e=a.find(x=>x.id===b.dataset.pdup);if(!e)return;const c=JSON.parse(JSON.stringify(e));c.id=uid();c.name=e.name+' (копия)';c.data.name=c.name;c.data.pid=c.id;c.updated=Date.now();a.unshift(c);libErr=!libStore(a);renderProjects();renderSaveState();return;}
+  if(b.dataset.pdel){const id=b.dataset.pdel;confirmTwice(b,'Удалить насовсем?',()=>{libStore(libLoad().filter(x=>x.id!==id));if(S.pid===id){S.pid='';baseline='';lastLib='';save();}renderProjects();renderSaveState();});return;}
   if(b.dataset.tab){setTab(b.dataset.tab);save();return;}
   if(b.dataset.view){S.view=b.dataset.view;renderVtabs();$('#tip').hidden=true;render();return;}
   if(b.dataset.add){const t=b.dataset.add,T=TYPES[t],{W,L,H}=FR();
@@ -825,17 +879,24 @@ document.addEventListener('click',e=>{
   else if(a==='resetfs'){S.floor.sx=S.floor.sy=0;render();}
   else if(a==='resetws'){S.wall.shift[S.view]=0;S.wall.sv=0;render();}
 });
-$('#b-example').onclick=()=>{S=example();fullRefresh();};
-$('#b-new').onclick=e=>{const b=e.currentTarget;
-  if(!newArmed){newArmed=1;b.textContent='Точно очистить?';b.classList.add('warn');setTimeout(()=>{newArmed=0;b.textContent='Новая комната';b.classList.remove('warn');},3000);return;}
-  newArmed=0;b.textContent='Новая комната';b.classList.remove('warn');S=base();S.tab='room';fullRefresh();};
-$('#b-copy').onclick=async e=>{const b=e.currentTarget,txt=JSON.stringify(S);
+$('#b-example').onclick=e=>guardUnsaved(e.currentTarget,()=>{openState(example(),'');$('#projbox').hidden=true;});
+$('#b-new').onclick=e=>guardUnsaved(e.currentTarget,()=>{const s=base();s.tab='room';openState(s,'');});
+function doSave(name){S.name=name;if(!S.pid)S.pid=uid();libPut(true);syncInputs();
+  if(libErr){$('#savemsg').textContent='Браузер не разрешает сохранять (возможно, приватный режим или нет места).';return false;}return true;}
+$('#b-save').onclick=e=>{const b=e.currentTarget;
+  if(S.pid){doSave((S.name||'').trim()||'Без названия');if(!libErr){b.textContent='Сохранено';setTimeout(()=>b.textContent='Сохранить',1500);}return;}
+  $('#projbox').hidden=true;$('#savebox').hidden=false;$('#savemsg').textContent='';const i=$('#savename');i.value=(S.name&&S.name!=='Новая ванная'&&!/пример/i.test(S.name))?S.name:'';i.focus();};
+$('#b-save-ok').onclick=()=>{const n=$('#savename').value.trim();if(!n){$('#savemsg').textContent='Введите название проекта.';$('#savename').focus();return;}
+  if(doSave(n)){$('#savebox').hidden=true;baseline=snap();}};
+$('#savename').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();$('#b-save-ok').click();}});
+$('#b-projects').onclick=()=>{const pb=$('#projbox');pb.hidden=!pb.hidden;$('#savebox').hidden=true;if(!pb.hidden)renderProjects();};
+$('#b-copy').onclick=async e=>{const b=e.currentTarget,o=Object.assign({},S);delete o.pid;const txt=JSON.stringify(o);
   try{await navigator.clipboard.writeText(txt);b.textContent='Скопировано';}
   catch(err){$('#pastebox').hidden=false;$('#pastearea').value=txt;$('#pastearea').select();$('#pastemsg').textContent='Скопируйте текст из поля вручную (Ctrl+C).';}
-  setTimeout(()=>b.textContent='Скопировать проект',1800);};
-$('#b-paste').onclick=()=>{$('#pastebox').hidden=false;$('#pastearea').value='';$('#pastemsg').textContent='';$('#pastearea').focus();};
+  setTimeout(()=>b.textContent='Скопировать для переноса',1800);};
+$('#b-paste').onclick=()=>{$('#pastebox').hidden=false;$('#savebox').hidden=true;$('#pastearea').value='';$('#pastemsg').textContent='';$('#pastearea').focus();};
 $('#b-paste-close').onclick=()=>{$('#pastebox').hidden=true;};
-$('#b-paste-load').onclick=()=>{try{const s=normalize(JSON.parse($('#pastearea').value));S=s;fullRefresh();$('#pastebox').hidden=true;}
+$('#b-paste-load').onclick=()=>{try{const s=normalize(JSON.parse($('#pastearea').value));openState(s,'');$('#pastebox').hidden=true;$('#projbox').hidden=true;$('#savestate').textContent='Не сохранён — нажмите «Сохранить»';}
   catch(err){$('#pastemsg').textContent='Не получилось прочитать. Вставьте текст целиком, как он был скопирован.';}};
 
 /* перетаскивание */
@@ -884,7 +945,7 @@ document.addEventListener('keydown',e=>{
 });
 
 /* старт */
-S=load();buildRoom();buildTile();buildItems();fullRefresh();
+S=load();if(S.pid&&!libLoad().some(x=>x.id===S.pid))S.pid='';baseline=snap();lastLib=S.pid?snap():'';buildRoom();buildTile();buildItems();fullRefresh();renderSaveState();
 })();
 </script>
 
