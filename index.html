@@ -16,26 +16,26 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Onest:wght@400;500;600;700&display=swap">
 <style>
 /* Layout: рабочее место плиточника — слева пульт настроек, справа чертёж на светлой подложке, ниже смета.
-   Палитра «травертин и оливковая глазурь»: тёплый камень, сливочные панели, мягкие тени, на фоне — сетка швов. */
+   Палитра «мёд и сливки: сливочный камень, медово-янтарная глазурь»: тёплый камень, сливочные панели, мягкие тени, на фоне — сетка швов. */
 :root{
-  --bg:#f2eee7; --grid:rgba(120,92,52,.06);
-  --panel:#fffdf9; --panel2:#f7f3ec; --ink:#2b2621; --muted:#76695b; --line:#e8e0d4; --line2:#d8ccbb;
-  --accent:#4e6b3a; --accent-2:#66874c; --accent-soft:#e7eedd; --accent-ink:#fffdf9; --ok:#4e8a3a;
+  --bg:#f5f0e6; --grid:rgba(150,110,40,.07);
+  --panel:#fffcf6; --panel2:#f9f3e8; --ink:#2d2418; --muted:#7a6a52; --line:#ebe1cf; --line2:#dccdb2;
+  --accent:#a8620f; --accent-2:#c97d1c; --accent-soft:#f8e9cc; --accent-ink:#fffcf6; --ok:#4e8a3a;
   --scrim:rgba(40,30,20,.40);
   --shadow:0 1px 2px rgba(60,45,30,.06),0 8px 24px -10px rgba(60,45,30,.16);
   --shadow-lg:0 30px 70px -18px rgba(60,45,30,.40);
   --tile:#fffdf9; --tile-stroke:#c4b6a3; --grout:#e2d9cc; --paint:#ede7dd;
   --cut:#f6dfae; --cut-stroke:#b07f1c; --small:#f5bba9; --small-stroke:#c4442b;
-  --fixture:#fffdf9; --fixture-stroke:#3d352d; --layer:#e3d2b4; --wall:#7a6d5e; --sel:#d9691c; --glass:#d9e6e4; --elec:#c27a00; --water:#2a7bb8; --sewer:#6b6258;
+  --fixture:#fffdf9; --fixture-stroke:#3d352d; --layer:#e3d2b4; --wall:#7a6d5e; --sel:#c4421c; --glass:#d9e6e4; --elec:#c27a00; --water:#2a7bb8; --sewer:#6b6258;
   --r:16px; --r-sm:10px;
   --f-display:"Onest","Segoe UI",system-ui,sans-serif;
   --f-body:"Onest","Segoe UI",system-ui,-apple-system,sans-serif;
   --f-mono:"JetBrains Mono",ui-monospace,"Cascadia Mono",Consolas,monospace;
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
-  --bg:#1a1714; --grid:rgba(230,200,150,.04);
-  --panel:#24201b; --panel2:#2b2620; --ink:#efe8dd; --muted:#ab9f8f; --line:#38312a; --line2:#463d34;
-  --accent:#a8c486; --accent-2:#bdd59d; --accent-soft:#313a26; --accent-ink:#1a1714; --ok:#9fce7c;
+  --bg:#1b1610; --grid:rgba(230,200,150,.04);
+  --panel:#251e15; --panel2:#2c241a; --ink:#f2e9da; --muted:#b2a189; --line:#3a3024; --line2:#4a3e2e;
+  --accent:#e8a54a; --accent-2:#f2bb6a; --accent-soft:#3d2e17; --accent-ink:#1b1610; --ok:#9fce7c;
   --scrim:rgba(8,6,4,.62);
   --shadow:0 1px 2px rgba(0,0,0,.35),0 10px 28px -12px rgba(0,0,0,.6);
   --shadow-lg:0 30px 70px -18px rgba(0,0,0,.8);
@@ -44,9 +44,9 @@
   --fixture:#3d362e; --fixture-stroke:#e2d9cc; --layer:#544733; --wall:#8d8172; --sel:#ffa14f; --glass:#2a3c3b; --elec:#f0b64a; --water:#6fb6ec; --sewer:#bdb4a8;
   color-scheme:dark}}
 :root[data-theme="dark"]{
-  --bg:#1a1714; --grid:rgba(230,200,150,.04);
-  --panel:#24201b; --panel2:#2b2620; --ink:#efe8dd; --muted:#ab9f8f; --line:#38312a; --line2:#463d34;
-  --accent:#a8c486; --accent-2:#bdd59d; --accent-soft:#313a26; --accent-ink:#1a1714; --ok:#9fce7c;
+  --bg:#1b1610; --grid:rgba(230,200,150,.04);
+  --panel:#251e15; --panel2:#2c241a; --ink:#f2e9da; --muted:#b2a189; --line:#3a3024; --line2:#4a3e2e;
+  --accent:#e8a54a; --accent-2:#f2bb6a; --accent-soft:#3d2e17; --accent-ink:#1b1610; --ok:#9fce7c;
   --scrim:rgba(8,6,4,.62);
   --shadow:0 1px 2px rgba(0,0,0,.35),0 10px 28px -12px rgba(0,0,0,.6);
   --shadow-lg:0 30px 70px -18px rgba(0,0,0,.8);
